@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+    <color name="background">#F6F6F6</color>
+    <color name="primaryColor">#3F51B5</color>
+    <color name="backgroundColor">#FFFFFF</color>
+    <color name="editTextBackground">#F3F3F3</color>
+    <color name="textColorPrimary">#212121</color>
+    <color name="textColorHint">#757575</color>
+    <color name="textColorHighlight">#BDBDBD</color>
+    <color name="colorOnSurface">#FFFFFF</color>
+    <color name="secondaryColor">#FF4081</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="card_view_title">#6600CC</color>
+    <color name="item_backgroun_planet">#E0E0E0</color>
+</resources>
+

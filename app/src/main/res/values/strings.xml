@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">AstroPlanetApp</string>
+    <string name="nombre_planeta">Nombre Planeta</string>
+</resources>
