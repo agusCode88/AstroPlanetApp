@@ -1,4 +1,9 @@
 <resources>
     <string name="app_name">AstroPlanetApp</string>
     <string name="nombre_planeta">Nombre Planeta</string>
+    <string name="sp_firstime">spFirstime</string>
+    <string name="user_registrer">Registrar Usuario\n</string>
+    <string name="tipo_usuario">userTypeNormal</string>
+    <string name="tipo_usuario_admin">userTypeAdmin</string>
+    <string name="admin_user">Administrador</string>
 </resources>
