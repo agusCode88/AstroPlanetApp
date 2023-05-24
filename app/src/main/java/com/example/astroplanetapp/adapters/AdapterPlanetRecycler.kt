@@ -25,14 +25,13 @@ class AdapterPlanetRecycler(
     override fun getItemCount(): Int = listPlanet.size
 
     override fun onBindViewHolder(holder: ViewHolderPlanet, position: Int) {
-
         val planet = listPlanet[position]
         holder.bind(planet)
     }
 
     fun add(planet: Planet) {
         listPlanet.add(planet)
-        //notifyDataSetChanged()
+        notifyDataSetChanged()
     }
 
     fun remove(adapterPosition: Int) {
