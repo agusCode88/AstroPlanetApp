@@ -16,17 +16,16 @@ import com.example.astroplanetapp.models.Planet
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlin.properties.Delegates
 
-class MainActivity : AppCompatActivity(),listernerRecyclerPlanet {
+class MainActivity : AppCompatActivity(), listernerRecyclerPlanet {
 
     private lateinit var mBinding: ActivityMainBinding
     private lateinit var mAdapterPlanet: AdapterPlanetRecycler
     private lateinit var mLayoutManager: GridLayoutManager
     private lateinit var mLayoutManagerLinear: LinearLayoutManager
     private lateinit var mPreferences: SharedPreferences
-    private  var mUserNormal: String? = null
-    private  var mUserAdmin: String? = null
+    private var mUserNormal: String? = null
+    private var mUserAdmin: String? = null
     private var mFirsTime by Delegates.notNull<Boolean>()
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,104 +35,104 @@ class MainActivity : AppCompatActivity(),listernerRecyclerPlanet {
         mPreferences = getPreferences(MODE_PRIVATE)
 
         // Seteando el valor verdadero por primera vez
-        mFirsTime = mPreferences.getBoolean(getString(R.string.sp_firstime),true)
-        mUserNormal= mPreferences.getString(getString(R.string.tipo_usuario), "")
-        mUserAdmin= mPreferences.getString(getString(R.string.tipo_usuario_admin), "")
+        mFirsTime = mPreferences.getBoolean(getString(R.string.sp_firstime), true)
+        mUserNormal = mPreferences.getString(getString(R.string.tipo_usuario), "")
+        mUserAdmin = mPreferences.getString(getString(R.string.tipo_usuario_admin), "")
 
-        if(mFirsTime){
+        if (mFirsTime) {
             makeAlertDialogMain()
+        }
+
+        if (mUserAdmin.equals("UserAdmin")) {
+            setupRecyclerView()
         } else {
-
+            setupRecyclerLinearView()
         }
-
-        mBinding.addButton?.setOnClickListener {
-
-            if(mUserNormal.equals("UserNormal")){
-                setupRecyclerLinearView()
-                addPlanet()
-            }
-
-            else{
-                setupRecyclerView()
-                addPlanet()
-            }
-
-        }
-
 
     }
 
     // Metodo que agrega un elemento a la lista mediante el adaptador
-    private fun addPlanet(){
+    private fun addPlanet() {
 
-        var planet:Planet = Planet(nombre=mBinding.planetInput.text.toString())
+        var planet: Planet = Planet(nombre = mBinding.planetInput.text.toString())
         mAdapterPlanet.add(planet)
         mAdapterPlanet.notifyDataSetChanged()
-        mBinding.planetInput.text.clear()
+        // mBinding.planetInput.text.clear()
 
     }
 
-  //   Metodo que setea el recyclerView en forma de grilla
-        private fun setupRecyclerView() {
+    //   Metodo que setea el recyclerView en forma de grilla
+    private fun setupRecyclerView() {
 
-            mAdapterPlanet = AdapterPlanetRecycler(mutableListOf(),this)
-            mLayoutManager = GridLayoutManager(this,2)
-            mBinding.recyclerPlanetas.apply {
-                setHasFixedSize(true)
-                layoutManager = mLayoutManager
-                adapter = mAdapterPlanet
-            }
-
+        mAdapterPlanet = AdapterPlanetRecycler(mutableListOf(), this)
+        mLayoutManager = GridLayoutManager(this, 2)
+        mBinding.recyclerPlanetas.apply {
+            setHasFixedSize(true)
+            layoutManager = mLayoutManager
+            adapter = mAdapterPlanet
+        }
         swipeHelper()
 
+        mBinding.addButton?.setOnClickListener {
+            addPlanet()
         }
+
+
+    }
 
     // Metodo que setea el recyclerView en forma de Filas
 
 
-    private fun makeAlertDialogMain(){
+    private fun makeAlertDialogMain() {
 
         val alertDialog = MaterialAlertDialogBuilder(this)
 
         alertDialog.setTitle(getString(R.string.app_name))
-           // alertDialog.setView(R.layout.alert_dialog_user)
-               alertDialog.setCancelable(false)
-                    alertDialog.setPositiveButton(getString(R.string.user_registrer),
-                    DialogInterface.OnClickListener { dialog, _ ->
+        // alertDialog.setView(R.layout.alert_dialog_user)
+        alertDialog.setCancelable(false)
+        alertDialog.setPositiveButton(getString(R.string.user_registrer),
+            DialogInterface.OnClickListener { dialog, _ ->
 
-                        mPreferences.edit().putBoolean(getString(R.string.sp_firstime),false).apply()
-                        mPreferences.edit().putString(getString(R.string.tipo_usuario),"UserNormal").apply()
-                        mFirsTime = false
-                        mUserNormal = "UserNormal"
+                mPreferences.edit().putBoolean(getString(R.string.sp_firstime), false).apply()
+                mPreferences.edit().putString(getString(R.string.tipo_usuario), "UserNormal")
+                    .apply()
+                mFirsTime = false
+                mUserNormal = "UserNormal"
 
-                        dialog.dismiss()
+                dialog.dismiss()
 
-                    })
+            })
 
-            alertDialog.setNeutralButton(getString(R.string.admin_user),
-                DialogInterface.OnClickListener{dialog, _ ->
+        alertDialog.setNeutralButton(getString(R.string.admin_user),
+            DialogInterface.OnClickListener { dialog, _ ->
 
-                    mPreferences.edit().putString(getString(R.string.admin_user),"UserAdmin").apply()
-                    mUserAdmin = "UserAdmin"
+                mPreferences.edit().putString(getString(R.string.admin_user), "UserAdmin").apply()
+                mPreferences.edit().putBoolean(getString(R.string.sp_firstime), false).apply()
+                mFirsTime = false
+                mUserAdmin = "UserAdmin"
 
-                    dialog.dismiss()
+                dialog.dismiss()
 
-                })
-                    .show()
+            })
+            .show()
     }
 
     private fun setupRecyclerLinearView() {
 
-        mAdapterPlanet = AdapterPlanetRecycler(mutableListOf(),this)
+        mAdapterPlanet = AdapterPlanetRecycler(mutableListOf(), this)
         mLayoutManagerLinear = LinearLayoutManager(this)
 
         mBinding.recyclerPlanetas.apply {
             setHasFixedSize(true)
-            layoutManager =mLayoutManagerLinear
+            layoutManager = mLayoutManagerLinear
             adapter = mAdapterPlanet
         }
-
         swipeHelper()
+
+        mBinding.addButton?.setOnClickListener {
+            addPlanet()
+        }
+
     }
 
     override fun onClickListener(planet: Planet) {
