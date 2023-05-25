@@ -61,6 +61,36 @@ class MainActivity : AppCompatActivity(), listernerRecyclerPlanet {
 
     }
 
+    private fun makeAlertDialogMain() {
+
+        val alertDialog = MaterialAlertDialogBuilder(this)
+
+        alertDialog.setTitle(getString(R.string.app_name))
+        // alertDialog.setView(R.layout.alert_dialog_user)
+        alertDialog.setCancelable(false)
+        alertDialog.setPositiveButton(getString(R.string.user_registrer),
+            DialogInterface.OnClickListener { dialog, _ ->
+                mPreferences.edit().putBoolean(getString(R.string.sp_firstime), false).apply()
+                mPreferences.edit().putString(getString(R.string.tipo_usuario), "UserNormal")
+                    .apply()
+                mFirsTime = false
+                mUserNormal = "UserNormal"
+
+                dialog.dismiss()
+            })
+
+        alertDialog.setNeutralButton(getString(R.string.admin_user),
+            DialogInterface.OnClickListener { dialog, _ ->
+                mPreferences.edit().putString(getString(R.string.admin_user), "UserAdmin").apply()
+                mPreferences.edit().putBoolean(getString(R.string.sp_firstime), false).apply()
+                mFirsTime = false
+                mUserAdmin = "UserAdmin"
+
+                dialog.dismiss()
+            })
+            .show()
+    }
+
     //   Metodo que setea el recyclerView en forma de grilla
     private fun setupRecyclerView() {
 
@@ -76,45 +106,6 @@ class MainActivity : AppCompatActivity(), listernerRecyclerPlanet {
         mBinding.addButton?.setOnClickListener {
             addPlanet()
         }
-
-
-    }
-
-    // Metodo que setea el recyclerView en forma de Filas
-
-
-    private fun makeAlertDialogMain() {
-
-        val alertDialog = MaterialAlertDialogBuilder(this)
-
-        alertDialog.setTitle(getString(R.string.app_name))
-        // alertDialog.setView(R.layout.alert_dialog_user)
-        alertDialog.setCancelable(false)
-        alertDialog.setPositiveButton(getString(R.string.user_registrer),
-            DialogInterface.OnClickListener { dialog, _ ->
-
-                mPreferences.edit().putBoolean(getString(R.string.sp_firstime), false).apply()
-                mPreferences.edit().putString(getString(R.string.tipo_usuario), "UserNormal")
-                    .apply()
-                mFirsTime = false
-                mUserNormal = "UserNormal"
-
-                dialog.dismiss()
-
-            })
-
-        alertDialog.setNeutralButton(getString(R.string.admin_user),
-            DialogInterface.OnClickListener { dialog, _ ->
-
-                mPreferences.edit().putString(getString(R.string.admin_user), "UserAdmin").apply()
-                mPreferences.edit().putBoolean(getString(R.string.sp_firstime), false).apply()
-                mFirsTime = false
-                mUserAdmin = "UserAdmin"
-
-                dialog.dismiss()
-
-            })
-            .show()
     }
 
     private fun setupRecyclerLinearView() {
