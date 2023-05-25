@@ -51,8 +51,6 @@ class AdapterPlanetRecycler(
 
             binding.btnDelete.setOnClickListener { flightListener.onClickListener(planet) }
 
-
-
         }
 
     }
