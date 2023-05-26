@@ -11,7 +11,6 @@ import com.example.astroplanetapp.models.Planet
 abstract class AstroPlanetDataBase:RoomDatabase() {
 
     abstract fun planetDao() : PlanetDao
-
     companion object{
         @Volatile
         private var INSTANCE:AstroPlanetDataBase? = null

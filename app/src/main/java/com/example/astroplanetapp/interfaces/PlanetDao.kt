@@ -11,15 +11,15 @@ import com.example.astroplanetapp.models.Planet
 interface PlanetDao {
 
     @Query("SELECT * FROM PLANET")
-    fun getAllPlanets() :MutableList<Planet>
+    suspend fun getAllPlanets() :MutableList<Planet>
 
     @Insert
-    fun insertPlanet(planet: Planet)
+    suspend fun insertPlanet(planet: Planet)
 
     @Update
-    fun updatePlanet(planet:Planet)
+    suspend fun updatePlanet(planet:Planet)
 
     @Delete
-    fun deletePlanet(planet:Planet)
+    suspend fun deletePlanet(planet:Planet)
 
 }

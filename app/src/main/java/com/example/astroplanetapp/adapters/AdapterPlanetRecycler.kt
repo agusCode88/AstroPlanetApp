@@ -9,7 +9,7 @@ import com.example.astroplanetapp.models.Planet
 
 
 class AdapterPlanetRecycler(
-    private val listPlanet: MutableList<Planet>,
+    private var listPlanet: MutableList<Planet>,
     private val flightListener: listernerRecyclerPlanet
 ) : RecyclerView.Adapter<AdapterPlanetRecycler.ViewHolderPlanet>() {
 
@@ -40,12 +40,19 @@ class AdapterPlanetRecycler(
         notifyDataSetChanged()
     }
 
+    fun setPlanetList(planets : MutableList<Planet>) {
+
+        listPlanet = planets
+        notifyDataSetChanged()
+
+    }
+
     inner class ViewHolderPlanet(private val binding:ItemPlanetReclyBinding):
         RecyclerView.ViewHolder(binding.root){
 
         fun bind(planet:Planet){
 
-            //  binding.txtCity.text = planet.nombre
+              binding.txtName.text = planet.nombre
 //            Picasso.get().load(flight.imagen).fit().into(binding.cityImage)
 //            binding.root.setOnClickListener { flightListener.onClick(flight,adapterPosition) }
 

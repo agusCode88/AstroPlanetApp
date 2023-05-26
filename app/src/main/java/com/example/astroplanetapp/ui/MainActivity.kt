@@ -4,16 +4,24 @@ import android.content.DialogInterface
 import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Looper
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.astroplanetapp.R
 import com.example.astroplanetapp.adapters.AdapterPlanetRecycler
+import com.example.astroplanetapp.database.AstroPlanetDataBase
 import com.example.astroplanetapp.databinding.ActivityMainBinding
+import com.example.astroplanetapp.interfaces.PlanetDao
 import com.example.astroplanetapp.interfaces.listernerRecyclerPlanet
 import com.example.astroplanetapp.models.Planet
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.util.concurrent.LinkedBlockingDeque
 import kotlin.properties.Delegates
 
 class MainActivity : AppCompatActivity(), listernerRecyclerPlanet {
@@ -26,63 +34,72 @@ class MainActivity : AppCompatActivity(), listernerRecyclerPlanet {
     private var mUserNormal: String? = null
     private var mUserAdmin: String? = null
     private var mFirsTime by Delegates.notNull<Boolean>()
-
+    private var mAstroPlanetDataBase: AstroPlanetDataBase? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         mBinding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(mBinding.root)
 
         mPreferences = getPreferences(MODE_PRIVATE)
-
         // Seteando el valor verdadero por primera vez
         mFirsTime = mPreferences.getBoolean(getString(R.string.sp_firstime), true)
         mUserNormal = mPreferences.getString(getString(R.string.tipo_usuario), "")
         mUserAdmin = mPreferences.getString(getString(R.string.tipo_usuario_admin), "")
 
+        mAstroPlanetDataBase = AstroPlanetDataBase.getDatabase(this)
+        val planetDao = mAstroPlanetDataBase?.planetDao()
+
         if (mFirsTime) {
             makeAlertDialogMain()
         }
-
         if (mUserAdmin.equals("UserAdmin")) {
-                setupRecyclerView()
-            } else {
-                setupRecyclerLinearView()
-            }
+            setupRecyclerView(planetDao)
+
+        } else {
+            setupRecyclerLinearView(planetDao)
+        }
 
     }
 
     // Metodo que agrega un elemento a la lista mediante el adaptador
-    private fun addPlanet() {
+    private fun addPlanet(planetDao: PlanetDao?) {
 
-        var planet: Planet = Planet(nombre = mBinding.planetInput.text.toString())
+        var planet = Planet(nombre = mBinding.planetInput.text.toString())
+
+//        Thread {
+//            planetDao?.insertPlanet(planet)
+//        }.start()
+
+        lifecycleScope.launch(Dispatchers.IO) {
+            planetDao?.insertPlanet(planet)
+        }
+
         mAdapterPlanet.add(planet)
-        mAdapterPlanet.notifyDataSetChanged()
-       // mBinding.planetInput.text.clear()
+        //mAdapterPlanet.notifyDataSetChanged()
+        mBinding.planetInput.text.clear()
 
     }
 
-    //   Metodo que setea el recyclerView en forma de grilla
-    private fun setupRecyclerView() {
+    private fun getAllPlanets(daoPlanet: PlanetDao?){
+//        val qeue = LinkedBlockingDeque<MutableList<Planet>>()
+//        Thread{
+//            val planetsList = daoPlanet?.getAllPlanets()
+//            qeue.add(planetsList)
+//        }.start()
 
-        mAdapterPlanet = AdapterPlanetRecycler(mutableListOf(), this)
-        mLayoutManager = GridLayoutManager(this, 2)
-        mBinding.recyclerPlanetas.apply {
-            setHasFixedSize(true)
-            layoutManager = mLayoutManager
-            adapter = mAdapterPlanet
+        lifecycleScope.launch(Dispatchers.IO) {
+            val planetList = daoPlanet?.getAllPlanets()
+            planetList?.let { planets ->
+                withContext(Dispatchers.Main) {
+                    mAdapterPlanet.setPlanetList(planets)
+                }
+            }
         }
-        swipeHelper()
-
-        mBinding.addButton?.setOnClickListener {
-            addPlanet()
-        }
-
 
     }
+
 
     // Metodo que setea el recyclerView en forma de Filas
-
-
     private fun makeAlertDialogMain() {
 
         val alertDialog = MaterialAlertDialogBuilder(this)
@@ -117,10 +134,33 @@ class MainActivity : AppCompatActivity(), listernerRecyclerPlanet {
             .show()
     }
 
-    private fun setupRecyclerLinearView() {
+    //   Metodo que setea el recyclerView en forma de grilla
+    private fun setupRecyclerView(daoPlanet: PlanetDao?) {
+
+        mAdapterPlanet = AdapterPlanetRecycler(mutableListOf(), this)
+        mLayoutManager = GridLayoutManager(this, 2)
+
+        getAllPlanets(daoPlanet)
+
+        mBinding.recyclerPlanetas.apply {
+            setHasFixedSize(true)
+            layoutManager = mLayoutManager
+            adapter = mAdapterPlanet
+        }
+        swipeHelper()
+
+        mBinding.addButton?.setOnClickListener {
+            addPlanet(daoPlanet)
+        }
+
+    }
+
+    private fun setupRecyclerLinearView(planetDao: PlanetDao?) {
 
         mAdapterPlanet = AdapterPlanetRecycler(mutableListOf(), this)
         mLayoutManagerLinear = LinearLayoutManager(this)
+
+        getAllPlanets(planetDao)
 
         mBinding.recyclerPlanetas.apply {
             setHasFixedSize(true)
@@ -130,7 +170,7 @@ class MainActivity : AppCompatActivity(), listernerRecyclerPlanet {
         swipeHelper()
 
         mBinding.addButton?.setOnClickListener {
-            addPlanet()
+            addPlanet(planetDao)
         }
 
     }
