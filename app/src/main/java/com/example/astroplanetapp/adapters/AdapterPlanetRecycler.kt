@@ -10,13 +10,13 @@ import com.example.astroplanetapp.models.Planet
 
 class AdapterPlanetRecycler(
     private var listPlanet: MutableList<Planet>,
-    private val flightListener: listernerRecyclerPlanet
+    private val planetListener: listernerRecyclerPlanet
 ) : RecyclerView.Adapter<AdapterPlanetRecycler.ViewHolderPlanet>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolderPlanet {
 
         val inflater = LayoutInflater.from(parent.context)
-        val binding = ItemPlanetReclyBinding.inflate(inflater,parent,false)
+        val binding = ItemPlanetReclyBinding.inflate(inflater, parent, false)
 
         return ViewHolderPlanet(binding)
 
@@ -40,26 +40,57 @@ class AdapterPlanetRecycler(
         notifyDataSetChanged()
     }
 
-    fun setPlanetList(planets : MutableList<Planet>) {
+    fun setPlanetList(planets: MutableList<Planet>) {
 
         listPlanet = planets
         notifyDataSetChanged()
 
     }
 
-    inner class ViewHolderPlanet(private val binding:ItemPlanetReclyBinding):
-        RecyclerView.ViewHolder(binding.root){
+    fun updatePlanetFavorite(planet: Planet) {
 
-        fun bind(planet:Planet){
+        val index = listPlanet.lastIndexOf(planet)
+        if (index != -1) {
+            listPlanet.set(index, planet)
+            notifyDataSetChanged()
+        }
 
-              binding.txtName.text = planet.nombre
+    }
+
+    fun deletePlanet(planet: Planet) {
+
+        val index = listPlanet.lastIndexOf(planet)
+        if (index != -1) {
+            listPlanet.removeAt(index)
+            notifyItemChanged(index)
+            notifyDataSetChanged()
+        }
+    }
+
+    inner class ViewHolderPlanet(private val binding: ItemPlanetReclyBinding) :
+        RecyclerView.ViewHolder(binding.root) {
+
+        fun bind(planet: Planet) {
+
+            binding.txtName.text = planet.nombre
 //            Picasso.get().load(flight.imagen).fit().into(binding.cityImage)
 //            binding.root.setOnClickListener { flightListener.onClick(flight,adapterPosition) }
 
-            binding.btnDelete.setOnClickListener { flightListener.onClickListener(planet) }
+
+            with(binding.root){
+                setOnLongClickListener { planetListener.onDeletePlanet(planet)
+                    true }
+            }
+
+            binding.btnFavorite.isChecked = planet.isFavorite
+
+            binding.btnFavorite.setOnClickListener {
+                planet.isFavorite = !planet.isFavorite
+                planetListener.onclickFavoriteListener(planet)
+
+            }
 
         }
-
     }
 
 }

@@ -61,7 +61,11 @@ class MainActivity : AppCompatActivity(), listernerRecyclerPlanet {
 
     }
 
-    // Metodo que agrega un elemento a la lista mediante el adaptador
+    /**
+     * **********************************
+     * CRUD DE PLANETAS
+     * ************************************8
+     */
     private fun addPlanet(planetDao: PlanetDao?) {
 
         var planet = Planet(nombre = mBinding.planetInput.text.toString())
@@ -80,7 +84,7 @@ class MainActivity : AppCompatActivity(), listernerRecyclerPlanet {
 
     }
 
-    private fun getAllPlanets(daoPlanet: PlanetDao?){
+    private fun getAllPlanets(daoPlanet: PlanetDao?) {
 //        val qeue = LinkedBlockingDeque<MutableList<Planet>>()
 //        Thread{
 //            val planetsList = daoPlanet?.getAllPlanets()
@@ -96,6 +100,32 @@ class MainActivity : AppCompatActivity(), listernerRecyclerPlanet {
             }
         }
 
+    }
+
+    fun updatePlanet(planet: Planet){
+
+        val planetDao = mAstroPlanetDataBase?.planetDao()
+        planet.isFavorite = !planet.isFavorite
+        lifecycleScope.launch(Dispatchers.IO) {
+            planet?.let {
+
+                val id = planetDao?.updatePlanet(planet)
+                mAdapterPlanet.updatePlanetFavorite(planet)
+            }
+        }
+
+    }
+
+    fun deletePlanet(planet: Planet){
+
+        val planetDao = mAstroPlanetDataBase?.planetDao()
+        lifecycleScope.launch(Dispatchers.IO) {
+            planet?.let {
+
+                val id = planetDao?.deletePlanet(planet)
+                mAdapterPlanet.deletePlanet(planet)
+            }
+        }
     }
 
 
@@ -175,9 +205,28 @@ class MainActivity : AppCompatActivity(), listernerRecyclerPlanet {
 
     }
 
+    /**
+     *
+     *
+     * OnclickListeners de la actividad
+     *
+     *  Click para el cardViewCompleto
+     *  Click para el boton favoritos
+     *
+     *
+     */
     override fun onClickListener(planet: Planet) {
 
     }
+
+    override fun onclickFavoriteListener(planet: Planet) {
+        updatePlanet(planet)
+    }
+
+    override fun onDeletePlanet(planet: Planet) {
+        deletePlanet(planet)
+    }
+
 
     /*
     Codigo para borrar un elemento de la lista a traves del gesto de swipe
@@ -200,3 +249,12 @@ class MainActivity : AppCompatActivity(), listernerRecyclerPlanet {
     }
 
 }
+
+
+/**
+ * Queda por implementar
+ *
+ * Actualizar un planeta
+ * Eliminar un planeta
+ *
+ */
