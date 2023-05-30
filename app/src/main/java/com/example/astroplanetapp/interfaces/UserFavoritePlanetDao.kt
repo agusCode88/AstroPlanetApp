@@ -10,5 +10,4 @@ interface UserFavoritePlanetDao {
     @Insert
     suspend fun insertUserFavoritePlanet(userFavoritePlanet: UserFavoritePlanet)
 
-    // Otras operaciones de consulta, actualización y eliminación para UserFavoritePlanet
 }

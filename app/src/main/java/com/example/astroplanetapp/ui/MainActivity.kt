@@ -4,7 +4,6 @@ import android.content.DialogInterface
 import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.os.Looper
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -23,15 +22,12 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.util.concurrent.LinkedBlockingDeque
 import kotlin.properties.Delegates
 
 class MainActivity : AppCompatActivity(), listernerRecyclerPlanet {
 
     private lateinit var mBinding: ActivityMainBinding
     private lateinit var mAdapterPlanet: AdapterPlanetRecycler
-    private lateinit var mLayoutManager: GridLayoutManager
-    private lateinit var mLayoutManagerLinear: LinearLayoutManager
     private lateinit var mPreferences: SharedPreferences
     private var mUserNormal: String? = null
     private var mUserAdmin: String? = null
@@ -55,70 +51,17 @@ class MainActivity : AppCompatActivity(), listernerRecyclerPlanet {
 
         if (mFirsTime) {
             makeAlertDialogMain(userDao)
-        }
-        if (mUserAdmin.equals("UserAdmin")) {
-            setupRecyclerView(planetDao)
-
+            setupRecyclerViewBasedOnUser(planetDao)
         } else {
-            setupRecyclerLinearView(planetDao)
+            setupRecyclerViewBasedOnUser(planetDao)
         }
 
     }
 
-    /**
-     * **********************************
-     * CRUD DE PLANETAS
-     * ************************************8
+
+    /*
+    Fubncion que borra una entidad de la base de datos y en el adaptador del Recycler
      */
-    private fun addPlanet(planetDao: PlanetDao?) {
-
-        var planet = Planet(nombre = mBinding.planetInput.text.toString())
-
-//        Thread {
-//            planetDao?.insertPlanet(planet)
-//        }.start()
-
-        lifecycleScope.launch(Dispatchers.IO) {
-            planetDao?.insertPlanet(planet)
-        }
-
-        mAdapterPlanet.add(planet)
-        //mAdapterPlanet.notifyDataSetChanged()
-        mBinding.planetInput.text.clear()
-
-    }
-
-    private fun getAllPlanets(daoPlanet: PlanetDao?) {
-//        val qeue = LinkedBlockingDeque<MutableList<Planet>>()
-//        Thread{
-//            val planetsList = daoPlanet?.getAllPlanets()
-//            qeue.add(planetsList)
-//        }.start()
-
-        lifecycleScope.launch(Dispatchers.IO) {
-            val planetList = daoPlanet?.getAllPlanets()
-            planetList?.let { planets ->
-                withContext(Dispatchers.Main) {
-                    mAdapterPlanet.setPlanetList(planets)
-                }
-            }
-        }
-
-    }
-
-    private fun updatePlanet(planet: Planet) {
-
-        val planetDao = mAstroPlanetDataBase?.planetDao()
-        planet.isFavorite = !planet.isFavorite
-        lifecycleScope.launch(Dispatchers.IO) {
-            planet?.let {
-                val id = planetDao?.updatePlanet(planet)
-                mAdapterPlanet.updatePlanetFavorite(planet)
-            }
-        }
-
-    }
-
     private fun deletePlanet(planet: Planet) {
 
         val planetDao = mAstroPlanetDataBase?.planetDao()
@@ -132,7 +75,7 @@ class MainActivity : AppCompatActivity(), listernerRecyclerPlanet {
     }
 
 
-    // Metodo que setea el recyclerView en forma de Filas
+    // Metodo que Muestra el popo up de seleccion de Roles
     private fun makeAlertDialogMain(userDao: UserDao?) {
 
         val alertDialog = MaterialAlertDialogBuilder(this)
@@ -176,47 +119,44 @@ class MainActivity : AppCompatActivity(), listernerRecyclerPlanet {
             .show()
     }
 
-    //   Metodo que setea el recyclerView en forma de grilla
-    private fun setupRecyclerView(daoPlanet: PlanetDao?) {
+    /*
+    Funcion para comprobar si se trata de un usuario con Rol de Administrador o es un usuario de la app
+     */
+    private fun setupRecyclerViewBasedOnUser(planetDao: PlanetDao?) {
+        val isUserAdmin = mPreferences.getString(getString(R.string.admin_user), "") == "UserAdmin"
 
-        mAdapterPlanet = AdapterPlanetRecycler(mutableListOf(), this)
-        mLayoutManager = GridLayoutManager(this, 2)
-
-        getAllPlanets(daoPlanet)
-
-        mBinding.recyclerPlanetas.apply {
-            setHasFixedSize(true)
-            layoutManager = mLayoutManager
-            adapter = mAdapterPlanet
+        if (isUserAdmin) {
+            setupRecyclerViewWithLayout(GridLayoutManager(this, 2),planetDao)
+        } else {
+            setupRecyclerViewWithLayout(LinearLayoutManager(this),planetDao)
         }
-        swipeHelper()
-
-        mBinding.addButton?.setOnClickListener {
-            addPlanet(daoPlanet)
-        }
-
     }
 
-    private fun setupRecyclerLinearView(planetDao: PlanetDao?) {
+    /*
+    Funcion que permite configurar el recyclerView con su adaptador, se le manda por parametro
+    si lo queremos en forma de Linear o en forma de grilla.
+     */
+    private fun setupRecyclerViewWithLayout(layoutManager: RecyclerView.LayoutManager,
+                                            planetDao: PlanetDao?) {
 
         mAdapterPlanet = AdapterPlanetRecycler(mutableListOf(), this)
-        mLayoutManagerLinear = LinearLayoutManager(this)
-
-        getAllPlanets(planetDao)
-
         mBinding.recyclerPlanetas.apply {
             setHasFixedSize(true)
-            layoutManager = mLayoutManagerLinear
+            this.layoutManager = layoutManager
             adapter = mAdapterPlanet
         }
         swipeHelper()
+        setupAddButton(planetDao)
+    }
 
+    /*
+    Funcion que es escucha del boton agregar
+     */
+    private fun setupAddButton(planetDao: PlanetDao?) {
         mBinding.addButton?.setOnClickListener {
             addPlanet(planetDao)
         }
-
     }
-
 
     /*
     Codigo para borrar un elemento de la lista a traves del gesto de swipe
@@ -239,14 +179,72 @@ class MainActivity : AppCompatActivity(), listernerRecyclerPlanet {
     }
 
     /**
-     *
+     * **********************************
+     * CRUD DE PLANETAS
+     * ************************************8
+     */
+    private fun addPlanet(planetDao: PlanetDao?) {
+
+        var planet = Planet(nombre = mBinding.planetInput.text.toString())
+
+        // Otra forma  de hacerelo, sin corrutinas. Son hilos nativos.
+
+//        Thread {
+//            planetDao?.insertPlanet(planet)
+//        }.start()
+
+        // Hecho con Corrutinas
+        lifecycleScope.launch(Dispatchers.IO) {
+            planetDao?.insertPlanet(planet)
+        }
+
+        mAdapterPlanet.add(planet)
+        //mAdapterPlanet.notifyDataSetChanged()
+        mBinding.planetInput.text.clear()
+
+    }
+
+    private fun getAllPlanets(daoPlanet: PlanetDao?) {
+//        val qeue = LinkedBlockingDeque<MutableList<Planet>>()
+//        Thread{
+//            val planetsList = daoPlanet?.getAllPlanets()
+//            qeue.add(planetsList)
+//        }.start()
+
+        lifecycleScope.launch(Dispatchers.IO) {
+            val planetList = daoPlanet?.getAllPlanets()
+            planetList?.let { planets ->
+                withContext(Dispatchers.Main) {
+                    mAdapterPlanet.setPlanetList(planets)
+                }
+            }
+        }
+
+    }
+
+    // Funcion que actualiza un planeta en la Base de datos, la actualizacion es el
+    // cambio de estado a favorito o no, tambien se hace en el adaptador
+    private fun updatePlanet(planet: Planet) {
+
+        val planetDao = mAstroPlanetDataBase?.planetDao()
+        planet.isFavorite = !planet.isFavorite
+        lifecycleScope.launch(Dispatchers.IO) {
+            planet?.let {
+                val id = planetDao?.updatePlanet(planet)
+                mAdapterPlanet.updatePlanetFavorite(planet)
+            }
+        }
+
+    }
+
+    /**
      *
      * OnclickListeners de la actividad
      *
      *  Click para el cardViewCompleto
      *  Click para el boton favoritos
-     *
-     *
+     *  Click Largo para eliminar
+
      */
     override fun onClickListener(planet: Planet) {
 
