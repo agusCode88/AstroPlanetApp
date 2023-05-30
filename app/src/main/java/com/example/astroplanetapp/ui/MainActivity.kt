@@ -15,8 +15,10 @@ import com.example.astroplanetapp.adapters.AdapterPlanetRecycler
 import com.example.astroplanetapp.database.AstroPlanetDataBase
 import com.example.astroplanetapp.databinding.ActivityMainBinding
 import com.example.astroplanetapp.interfaces.PlanetDao
+import com.example.astroplanetapp.interfaces.UserDao
 import com.example.astroplanetapp.interfaces.listernerRecyclerPlanet
 import com.example.astroplanetapp.models.Planet
+import com.example.astroplanetapp.models.User
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -37,20 +39,22 @@ class MainActivity : AppCompatActivity(), listernerRecyclerPlanet {
     private var mAstroPlanetDataBase: AstroPlanetDataBase? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         mBinding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(mBinding.root)
 
         mPreferences = getPreferences(MODE_PRIVATE)
-        // Seteando el valor verdadero por primera vez
+        // Seteando el valor verdadero , si parte por primera vez la app.
         mFirsTime = mPreferences.getBoolean(getString(R.string.sp_firstime), true)
         mUserNormal = mPreferences.getString(getString(R.string.tipo_usuario), "")
         mUserAdmin = mPreferences.getString(getString(R.string.tipo_usuario_admin), "")
 
         mAstroPlanetDataBase = AstroPlanetDataBase.getDatabase(this)
         val planetDao = mAstroPlanetDataBase?.planetDao()
+        val userDao = mAstroPlanetDataBase?.userDao()
 
         if (mFirsTime) {
-            makeAlertDialogMain()
+            makeAlertDialogMain(userDao)
         }
         if (mUserAdmin.equals("UserAdmin")) {
             setupRecyclerView(planetDao)
@@ -102,13 +106,12 @@ class MainActivity : AppCompatActivity(), listernerRecyclerPlanet {
 
     }
 
-    fun updatePlanet(planet: Planet){
+    private fun updatePlanet(planet: Planet) {
 
         val planetDao = mAstroPlanetDataBase?.planetDao()
         planet.isFavorite = !planet.isFavorite
         lifecycleScope.launch(Dispatchers.IO) {
             planet?.let {
-
                 val id = planetDao?.updatePlanet(planet)
                 mAdapterPlanet.updatePlanetFavorite(planet)
             }
@@ -116,7 +119,7 @@ class MainActivity : AppCompatActivity(), listernerRecyclerPlanet {
 
     }
 
-    fun deletePlanet(planet: Planet){
+    private fun deletePlanet(planet: Planet) {
 
         val planetDao = mAstroPlanetDataBase?.planetDao()
         lifecycleScope.launch(Dispatchers.IO) {
@@ -130,10 +133,9 @@ class MainActivity : AppCompatActivity(), listernerRecyclerPlanet {
 
 
     // Metodo que setea el recyclerView en forma de Filas
-    private fun makeAlertDialogMain() {
+    private fun makeAlertDialogMain(userDao: UserDao?) {
 
         val alertDialog = MaterialAlertDialogBuilder(this)
-
         alertDialog.setTitle(getString(R.string.app_name))
         // alertDialog.setView(R.layout.alert_dialog_user)
         alertDialog.setCancelable(false)
@@ -146,6 +148,11 @@ class MainActivity : AppCompatActivity(), listernerRecyclerPlanet {
                 mFirsTime = false
                 mUserNormal = "UserNormal"
 
+                val usuarioAPP = User(username = "agus", password = "123")
+                lifecycleScope.launch(Dispatchers.IO) {
+                    val idUser = userDao?.insertUser(usuarioAPP)
+                }
+
                 dialog.dismiss()
 
             })
@@ -157,6 +164,11 @@ class MainActivity : AppCompatActivity(), listernerRecyclerPlanet {
                 mPreferences.edit().putBoolean(getString(R.string.sp_firstime), false).apply()
                 mFirsTime = false
                 mUserAdmin = "UserAdmin"
+
+                val usuarioAPP = User(username = "agusAdmin", password = "123")
+                lifecycleScope.launch(Dispatchers.IO) {
+                    val idUser = userDao?.insertUser(usuarioAPP)
+                }
 
                 dialog.dismiss()
 
@@ -205,6 +217,27 @@ class MainActivity : AppCompatActivity(), listernerRecyclerPlanet {
 
     }
 
+
+    /*
+    Codigo para borrar un elemento de la lista a traves del gesto de swipe
+
+     */
+    private fun swipeHelper() {
+        val swipeHelper =
+            ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
+                override fun onMove(
+                    recyclerView: RecyclerView,
+                    viewHolder: RecyclerView.ViewHolder,
+                    target: RecyclerView.ViewHolder
+                ): Boolean = false
+
+                override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                    mAdapterPlanet.remove(viewHolder.adapterPosition)
+                }
+            })
+        swipeHelper.attachToRecyclerView(mBinding.recyclerPlanetas)
+    }
+
     /**
      *
      *
@@ -225,27 +258,6 @@ class MainActivity : AppCompatActivity(), listernerRecyclerPlanet {
 
     override fun onDeletePlanet(planet: Planet) {
         deletePlanet(planet)
-    }
-
-
-    /*
-    Codigo para borrar un elemento de la lista a traves del gesto de swipe
-
-     */
-    private fun swipeHelper() {
-        val swipeHelper =
-            ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
-                override fun onMove(
-                    recyclerView: RecyclerView,
-                    viewHolder: RecyclerView.ViewHolder,
-                    target: RecyclerView.ViewHolder
-                ): Boolean = false
-
-                override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-                    mAdapterPlanet.remove(viewHolder.adapterPosition)
-                }
-            })
-        swipeHelper.attachToRecyclerView(mBinding.recyclerPlanetas)
     }
 
 }

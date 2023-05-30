@@ -76,7 +76,6 @@ class AdapterPlanetRecycler(
 //            Picasso.get().load(flight.imagen).fit().into(binding.cityImage)
 //            binding.root.setOnClickListener { flightListener.onClick(flight,adapterPosition) }
 
-
             with(binding.root){
                 setOnLongClickListener { planetListener.onDeletePlanet(planet)
                     true }
