@@ -28,7 +28,7 @@
 
 
         <TextView
-            android:id="@+id/txtCity"
+            android:id="@+id/txtName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/nombre_planeta"
@@ -38,17 +38,17 @@
             android:textStyle="bold"
             android:shadowColor="@color/black" />
 
-        <ImageButton
-            android:id="@+id/btnDelete"
-            android:layout_width="35dp"
-            android:layout_height="35dp"
+        <com.google.android.material.checkbox.MaterialCheckBox
+            android:id="@+id/btnFavorite"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_gravity="end"
             android:layout_marginTop="180dp"
+            android:button="@drawable/state_favorite"
             android:layout_marginRight="5dp"
-            android:checked="true"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:foreground="?attr/selectableItemBackgroundBorderless"
-            android:src="@drawable/state_favorite"/>
+       />
 
 
     </FrameLayout>
