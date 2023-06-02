@@ -59,20 +59,7 @@ class MainActivity : AppCompatActivity(), listernerRecyclerPlanet {
     }
 
 
-    /*
-    Fubncion que borra una entidad de la base de datos y en el adaptador del Recycler
-     */
-    private fun deletePlanet(planet: Planet) {
 
-        val planetDao = mAstroPlanetDataBase?.planetDao()
-        lifecycleScope.launch(Dispatchers.IO) {
-            planet?.let {
-
-                val id = planetDao?.deletePlanet(planet)
-                mAdapterPlanet.deletePlanet(planet)
-            }
-        }
-    }
 
 
     // Metodo que Muestra el popo up de seleccion de Roles
@@ -123,7 +110,8 @@ class MainActivity : AppCompatActivity(), listernerRecyclerPlanet {
     Funcion para comprobar si se trata de un usuario con Rol de Administrador o es un usuario de la app
      */
     private fun setupRecyclerViewBasedOnUser(planetDao: PlanetDao?) {
-        val isUserAdmin = mPreferences.getString(getString(R.string.admin_user), "") == "UserAdmin"
+        val isUserAdmin =
+            mPreferences.getString(getString(R.string.admin_user), "") == "UserAdmin"
 
         if (isUserAdmin) {
             setupRecyclerViewWithLayout(GridLayoutManager(this, 2),planetDao)
@@ -235,6 +223,20 @@ class MainActivity : AppCompatActivity(), listernerRecyclerPlanet {
             }
         }
 
+    }
+
+    /*
+Fubncion que borra una entidad de la base de datos y en el adaptador del Recycler
+ */
+    private fun deletePlanet(planet: Planet) {
+
+        val planetDao = mAstroPlanetDataBase?.planetDao()
+        lifecycleScope.launch(Dispatchers.IO) {
+            planet?.let {
+                val id = planetDao?.deletePlanet(planet)
+                mAdapterPlanet.deletePlanet(planet)
+            }
+        }
     }
 
     /**
