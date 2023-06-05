@@ -2,8 +2,8 @@ package com.example.astroplanetapp.ui
 
 import android.content.DialogInterface
 import android.content.SharedPreferences
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -25,7 +25,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.properties.Delegates
 
-class MainActivity : AppCompatActivity(), listernerRecyclerPlanet {
+class MainActivity : ActionBarActivity(), listernerRecyclerPlanet {
 
     private lateinit var mBinding: ActivityMainBinding
     private lateinit var mAdapterPlanet: AdapterPlanetRecycler
@@ -139,9 +139,9 @@ class MainActivity : AppCompatActivity(), listernerRecyclerPlanet {
     Funcion que es escucha del boton agregar
      */
     private fun setupAddButton(planetDao: PlanetDao?) {
-        mBinding.addButton?.setOnClickListener {
-            addPlanet(planetDao)
-        }
+//        mBinding.addButton?.setOnClickListener {
+//            addPlanet(planetDao)
+//        }
     }
 
     private fun setUpAddPlanetFloatingBotton(){
@@ -190,23 +190,23 @@ class MainActivity : AppCompatActivity(), listernerRecyclerPlanet {
      * ************************************8
      */
     private fun addPlanet(planetDao: PlanetDao?) {
-
-        var planet = Planet(nombre = mBinding.planetInput.text.toString())
-
-        // Otra forma  de hacerelo, sin corrutinas. Son hilos nativos.
-
-//        Thread {
+//
+//        var planet = Planet(nombre = mBinding.planetInput.text.toString())
+//
+//        // Otra forma  de hacerelo, sin corrutinas. Son hilos nativos.
+//
+////        Thread {
+////            planetDao?.insertPlanet(planet)
+////        }.start()
+//
+//        // Hecho con Corrutinas
+//        lifecycleScope.launch(Dispatchers.IO) {
 //            planetDao?.insertPlanet(planet)
-//        }.start()
-
-        // Hecho con Corrutinas
-        lifecycleScope.launch(Dispatchers.IO) {
-            planetDao?.insertPlanet(planet)
-        }
-
-        mAdapterPlanet.add(planet)
-        //mAdapterPlanet.notifyDataSetChanged()
-        mBinding.planetInput.text.clear()
+//        }
+//
+//        mAdapterPlanet.add(planet)
+//        //mAdapterPlanet.notifyDataSetChanged()
+//        mBinding.planetInput.text.clear()
 
     }
 
