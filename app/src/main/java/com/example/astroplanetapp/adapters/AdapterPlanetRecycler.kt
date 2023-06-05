@@ -78,6 +78,7 @@ class AdapterPlanetRecycler(
 
             with(binding.root){
                 setOnLongClickListener { planetListener.onDeletePlanet(planet)
+                    setOnClickListener { planetListener.onClickListener(planet.id) }
                     true }
             }
 

@@ -18,6 +18,7 @@ import com.example.astroplanetapp.interfaces.UserDao
 import com.example.astroplanetapp.interfaces.listernerRecyclerPlanet
 import com.example.astroplanetapp.models.Planet
 import com.example.astroplanetapp.models.User
+import com.example.astroplanetapp.ui.fragments.CreateOrEditFragment
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -57,10 +58,6 @@ class MainActivity : AppCompatActivity(), listernerRecyclerPlanet {
         }
 
     }
-
-
-
-
 
     // Metodo que Muestra el popo up de seleccion de Roles
     private fun makeAlertDialogMain(userDao: UserDao?) {
@@ -135,6 +132,7 @@ class MainActivity : AppCompatActivity(), listernerRecyclerPlanet {
         }
         swipeHelper()
         setupAddButton(planetDao)
+        setUpAddPlanetFloatingBotton()
     }
 
     /*
@@ -144,6 +142,10 @@ class MainActivity : AppCompatActivity(), listernerRecyclerPlanet {
         mBinding.addButton?.setOnClickListener {
             addPlanet(planetDao)
         }
+    }
+
+    private fun setUpAddPlanetFloatingBotton(){
+        mBinding.addPlanetFB?.setOnClickListener { launchFragmentEditPlanet() }
     }
 
     /*
@@ -164,6 +166,22 @@ class MainActivity : AppCompatActivity(), listernerRecyclerPlanet {
                 }
             })
         swipeHelper.attachToRecyclerView(mBinding.recyclerPlanetas)
+    }
+
+
+    private fun launchFragmentEditPlanet(args: Bundle? = null) {
+        val fragmentEditOrCreatePlanet = CreateOrEditFragment()
+        val fragmentManager = supportFragmentManager
+        val fragmenTransaction = fragmentManager.beginTransaction()
+
+        if (args != null){
+            fragmentEditOrCreatePlanet.arguments = args
+        }
+
+        fragmenTransaction.add(R.id.container_main, fragmentEditOrCreatePlanet)
+        fragmenTransaction.commit()
+        fragmenTransaction.addToBackStack(null)
+
     }
 
     /**
@@ -248,7 +266,10 @@ Fubncion que borra una entidad de la base de datos y en el adaptador del Recycle
      *  Click Largo para eliminar
 
      */
-    override fun onClickListener(planet: Planet) {
+    override fun onClickListener(planetId: Int) {
+        val args = Bundle()
+        args.putInt(getString(R.string.paramInt),planetId)
+        launchFragmentEditPlanet(args)
 
     }
 

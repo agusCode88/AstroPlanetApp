@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="number_field">Superficie</string>
+    <string name="photo_url">Ingrese la url de la imagen</string>
+</resources>
