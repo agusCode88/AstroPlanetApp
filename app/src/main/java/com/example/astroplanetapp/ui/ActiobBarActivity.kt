@@ -22,6 +22,8 @@ open class ActionBarActivity : AppCompatActivity(), IActionBarApp {
 
     override fun loadButtonBackInScreen(value: Boolean) {
         supportActionBar?.setDisplayHomeAsUpEnabled(value)
+        //supportActionBar?.title = if(mIsEdit) getString(R.string.tile_ab_edit_store)
+        //else getString(R.string.tile_ab_add_store)
     }
 
     @SuppressLint("RestrictedApi")
@@ -34,6 +36,7 @@ open class ActionBarActivity : AppCompatActivity(), IActionBarApp {
     }
 
     override fun loadItemsOnMenuActionBar(toolbar: Toolbar) {
+
         toolbar.setOnMenuItemClickListener {
             when(it.itemId){
                 R.id.action_save -> {
